@@ -1,40 +1,42 @@
 # gitignore
 
-一个可自托管的 gitignore.io 替代方案，部署在 Cloudflare Pages 上。
+一个可自托管的 gitignore.io 替代方案，部署在 GitHub Pages 上。
 
-前端使用 Vite + React + TypeScript 构建，API 端点由 Cloudflare Pages Functions 提供，
-无需独立的 Worker 项目，前端与 API 共享同一域名。
+前端使用 Vite + React + TypeScript 构建，`/api` 端点在构建时生成为静态文件，
+无需服务器，可直接部署到任何静态站点托管服务。
 
 ## Why this shape
 
-- **Cloudflare Pages** 同时托管静态前端和 Functions（serverless handlers），无需额外 Worker 或独立 API 域名。
+- **纯静态部署** 构建产物为普通静态文件，可部署到 GitHub Pages、Cloudflare Pages 等任意静态托管，无需服务端运行时。
 - **`github/gitignore` submodule** 以 git submodule 方式跟踪 `github.com/github/gitignore`，构建时扫描生成模板数据，无需运行时网络请求。
 - **Bun** 用于依赖管理与构建。
 
 ## Features
 
 - 以 `github/gitignore` git submodule 方式同步上游模板
-- 构建时生成模板索引与内容映射，注入前端与 Pages Functions
+- 构建时生成模板索引、内容映射及静态 `/api/` 文件树
 - 前端支持搜索、选择、预览、复制、下载合并后的 `.gitignore`
 - `/api/list` 返回全部可用模板列表
-- `/api/{template}` 返回单模板内容
-- `/api/{template1},{template2}` 返回多个模板拼接后的内容
-- GitHub Actions 推送到 `master` 时自动构建并部署到 Cloudflare Pages
+- `/api/{template}` 返回单模板内容（静态文件）
+- 多模板合并通过浏览器客户端完成，下载时输出合并内容
+- 开发环境下 Vite dev 插件支持 `/api/Go,Node` 多模板拼接
+- GitHub Actions 推送到 `master` 时自动构建并部署到 GitHub Pages
 
 ## Repository layout
 
 ```
 github/gitignore/       上游模板仓库 submodule
 scripts/                构建脚本
-  generate-templates.mjs  扫描 submodule，生成 JSON 数据文件
-src/                    静态前端 (React + TypeScript)
-functions/              Cloudflare Pages Functions
-  api/
-    [[catchall]].ts     处理 /api/* 请求
-shared/                 前端与 Functions 共用的类型和工具函数
-wrangler.toml           Cloudflare Pages 配置
+  generate-templates.mjs  扫描 submodule，生成 JSON 数据文件与静态 API 文件树
+src/                    前端 (React + TypeScript)
+shared/                 前端共用的类型和工具函数
+public/
+  .nojekyll             禁用 Jekyll，确保无扩展名的 /api/* 文件正常服务
+  api/                  构建时生成，不纳入版本控制
+  data/                 构建时生成，不纳入版本控制
+vite.config.ts          Vite 配置，含 apiDevPlugin 开发中间件
 .github/workflows/
-  deploy.yml            自动构建并部署到 Cloudflare Pages
+  deploy.yml            自动构建并部署到 GitHub Pages
 ```
 
 ## Local development
@@ -51,7 +53,7 @@ git submodule update --init --recursive
 bun install
 ```
 
-启动前端开发环境：
+启动前端开发环境（同时生成模板数据）：
 
 ```bash
 bun run dev
@@ -74,14 +76,13 @@ GET /api/list
 返回以逗号分隔的 canonical template name 列表，例如：
 
 ```text
-AL,Actionscript,Global/macOS,Go,Node,...
+Actionscript,Ada,Global/macOS,Go,Node,...
 ```
 
-### Fetch one or more templates
+### Fetch a single template
 
 ```text
 GET /api/Go
-GET /api/Go,Node
 GET /api/macOS
 GET /api/Global%2FmacOS
 ```
@@ -90,26 +91,30 @@ GET /api/Global%2FmacOS
 
 - API 支持 canonical name，例如 `Global/macOS`
 - API 也支持常用短别名，例如 `macOS`
-- 模板合并时会按请求顺序拼接输出
-- 如果有未知模板，会返回 `404`
+- 每个模板对应一个静态文件，直接返回 `.gitignore` 内容
+- **多模板拼接**（如 `/api/Go,Node`）在静态部署下不支持，请使用前端 UI 选择多个模板后下载合并文件；本地开发时 Vite dev 插件支持此用法
 
-## Git alias example
+### Git alias example
 
 ```gitconfig
 [alias]
-ignore = "!gi() { curl -sL https://<your-pages-domain>/api/$@ ;}; gi"
+    ignore = "!gi() { curl -sL https://<your-pages-domain>/api/$@ ;}; gi"
 ```
 
-## Cloudflare Pages deployment
+单模板用法与 gitignore.io 完全兼容：
+
+```bash
+git ignore Go > .gitignore
+git ignore macOS >> .gitignore
+```
+
+## GitHub Pages deployment
 
 仓库包含 GitHub Actions 工作流，推送到 `master` 时自动构建并部署。
 
-需要在 GitHub 仓库中配置：
+在 GitHub 仓库中启用 Pages：Settings → Pages → Source 选择 **GitHub Actions**。
 
-- Repository secret: `CLOUDFLARE_API_TOKEN`
-- Repository variable: `CLOUDFLARE_ACCOUNT_ID`
-
-Cloudflare Pages 项目名称为 `gitignore`，首次部署前需在 Cloudflare Dashboard 创建该项目（或首次 push 时由 wrangler 自动创建）。
+无需额外配置 Secret 或 Variable。
 
 ## Updating templates
 
@@ -119,13 +124,14 @@ Cloudflare Pages 项目名称为 `gitignore`，首次部署前需在 Cloudflare 
 git submodule update --remote --merge github/gitignore
 ```
 
-然后重新构建：
+然后提交 submodule 指针更新并推送，GitHub Actions 将自动重新构建：
 
 ```bash
-bun run build
+git add github/gitignore
+git commit -m "chore: update github/gitignore submodule"
+git push
 ```
 
 ## Notes
 
-- 当前模板来源默认排除了 `community/` 目录，优先保留官方和 `Global/` 模板
-- 这能减少命名歧义，并维持更接近 gitignore.io 的使用体验
+- 当前模板来源默认排除了 `community/` 目录，优先保留官方和 `Global/` 模板，以减少命名歧义并维持更接近 gitignore.io 的使用体验
