@@ -378,6 +378,12 @@ pre {
   overflow-wrap: anywhere;
 }
 
+/* inline <code> inside note paragraphs must stay inline */
+.api-card p code {
+  display: inline;
+  white-space: nowrap;
+}
+
 .api-card p.muted-text {
   margin: 0;
 }

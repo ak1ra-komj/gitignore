@@ -92,7 +92,10 @@ GET /api/Global%2FmacOS
 - API 支持 canonical name，例如 `Global/macOS`
 - API 也支持常用短别名，例如 `macOS`
 - 每个模板对应一个静态文件，直接返回 `.gitignore` 内容
-- **多模板拼接**（如 `/api/Go,Node`）在静态部署下不支持，请使用前端 UI 选择多个模板后下载合并文件；本地开发时 Vite dev 插件支持此用法
+
+> **多模板拼接不通过 API 支持。** `/api/Go,Node` 这类请求在静态部署下无法工作——静态文件服务器没有拼接逻辑。
+> 多模板合并请使用前端 UI：选择多个模板后点击 **Download**，浏览器会在客户端完成拼接并下载合并后的 `.gitignore`。
+> 本地 `bun run dev` 时，Vite dev 插件会拦截 `/api/*` 请求并在内存中完成拼接，`curl /api/Go,Node` 可正常使用。
 
 ### Git alias example
 
