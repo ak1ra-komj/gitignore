@@ -93,7 +93,10 @@ pre {
   border: 1px solid transparent;
   border-radius: 999px;
   cursor: pointer;
-  transition: transform 100ms ease, background 100ms ease, border-color 100ms ease;
+  transition:
+    transform 100ms ease,
+    background 100ms ease,
+    border-color 100ms ease;
 }
 
 .button {
@@ -423,7 +426,6 @@ pre {
   }
 }
 
-
 :root {
   color-scheme: light;
   font-family: 'Space Grotesk', sans-serif;
@@ -458,7 +460,8 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: linear-gradient(rgba(22, 48, 64, 0.04) 1px, transparent 1px),
+  background-image:
+    linear-gradient(rgba(22, 48, 64, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(22, 48, 64, 0.04) 1px, transparent 1px);
   background-size: 32px 32px;
   pointer-events: none;
@@ -545,7 +548,10 @@ pre {
 .button {
   border: 1px solid transparent;
   border-radius: 999px;
-  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+  transition:
+    transform 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease;
   cursor: pointer;
 }
 

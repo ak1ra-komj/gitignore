@@ -71,7 +71,10 @@ function apiDevPlugin(): Plugin {
             return;
           }
 
-          const names = catchall.split(',').map((s) => s.trim()).filter(Boolean);
+          const names = catchall
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean);
           const bodies: string[] = [];
           const missing: string[] = [];
 
@@ -88,7 +91,9 @@ function apiDevPlugin(): Plugin {
 
           if (missing.length) {
             res.writeHead(404);
-            res.end(`Unknown template(s): ${missing.join(', ')}\nSee /api/list for available names.\n`);
+            res.end(
+              `Unknown template(s): ${missing.join(', ')}\nSee /api/list for available names.\n`,
+            );
             return;
           }
 

@@ -23,7 +23,7 @@ export function normalizeTemplateKey(value: string): string {
     .toLowerCase()
     .replace(/\.gitignore$/i, '')
     .replace(/[\s_.-]+/g, '')
-    .replace(/[\/]+/g, '');
+    .replace(/[/]+/g, '');
 }
 
 export function parseTemplateQuery(value: string): string[] {
