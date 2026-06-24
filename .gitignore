@@ -143,6 +143,4 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 
-public/api/
 public/data/
-worker/

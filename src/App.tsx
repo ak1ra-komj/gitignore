@@ -17,7 +17,10 @@ function buildApiBase(): string {
   return new URL('.', window.location.href).href.replace(/\/$/, '');
 }
 
-function buildPreview(selection: string[], templates: Record<string, TemplateRecord> | null): string {
+function buildPreview(
+  selection: string[],
+  templates: Record<string, TemplateRecord> | null,
+): string {
   if (!selection.length || !templates) {
     return '';
   }
@@ -37,7 +40,9 @@ type ApiModalProps = {
 
 function ApiModal({ apiBase, selection, onClose }: ApiModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const apiTemplatePath = selection.length ? selection.map(encodeURIComponent).join(',') : 'Go,Node';
+  const apiTemplatePath = selection.length
+    ? selection.map(encodeURIComponent).join(',')
+    : 'Go,Node';
   const apiTarget = `${apiBase}/api/${apiTemplatePath}`;
   const apiListTarget = `${apiBase}/api/list`;
 
@@ -76,14 +81,6 @@ function ApiModal({ apiBase, selection, onClose }: ApiModalProps) {
         <div className="api-card">
           <p className="api-card__label">Git alias</p>
           <pre>{`[alias]\n    ignore = "!gi() { curl -sL ${apiBase}/api/$@ ;}; gi"`}</pre>
-        </div>
-        <div className="api-card api-card--note">
-          <p className="api-card__label">Note</p>
-          <p className="muted-text small-text">
-            Single-template requests like <code>curl /api/Go</code> are served as static files.
-            Multi-template concatenation (<code>curl /api/Go,Node</code>) requires a dynamic
-            backend — use the UI above for merged downloads on this static deployment.
-          </p>
         </div>
       </div>
     </dialog>
@@ -259,7 +256,9 @@ export default function App() {
                 key={item}
                 className={`pill${selection.includes(item) ? ' pill--active' : ''}`}
                 type="button"
-                onClick={() => (selection.includes(item) ? removeTemplate(item) : addTemplate(item))}
+                onClick={() =>
+                  selection.includes(item) ? removeTemplate(item) : addTemplate(item)
+                }
               >
                 {item}
               </button>
@@ -307,7 +306,12 @@ export default function App() {
           {selection.length > 0 && (
             <div className="selection">
               {selection.map((item) => (
-                <button key={item} className="chip" type="button" onClick={() => removeTemplate(item)}>
+                <button
+                  key={item}
+                  className="chip"
+                  type="button"
+                  onClick={() => removeTemplate(item)}
+                >
                   {item} ✕
                 </button>
               ))}
@@ -332,7 +336,11 @@ export default function App() {
                 >
                   Copy
                 </button>
-                <button className="button button--secondary" type="button" onClick={downloadPreview}>
+                <button
+                  className="button button--secondary"
+                  type="button"
+                  onClick={downloadPreview}
+                >
                   Download
                 </button>
               </div>
@@ -352,4 +360,3 @@ export default function App() {
     </div>
   );
 }
-

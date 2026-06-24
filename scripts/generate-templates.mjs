@@ -5,13 +5,8 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
 const sourceDir = path.join(rootDir, 'github', 'gitignore');
-const outputTargets = [
-  path.join(rootDir, 'public', 'data', 'templates-index.json'),
-];
-const mapTargets = [
-  path.join(rootDir, 'public', 'data', 'templates-map.json'),
-];
-const apiDir = path.join(rootDir, 'public', 'api');
+const outputTargets = [path.join(rootDir, 'public', 'data', 'templates-index.json')];
+const mapTargets = [path.join(rootDir, 'public', 'data', 'templates-map.json')];
 
 function normalizeTemplateKey(value) {
   return value
@@ -19,7 +14,7 @@ function normalizeTemplateKey(value) {
     .toLowerCase()
     .replace(/\.gitignore$/i, '')
     .replace(/[\s_.-]+/g, '')
-    .replace(/[\/]+/g, '');
+    .replace(/[/]+/g, '');
 }
 
 async function walk(directory) {
@@ -67,7 +62,9 @@ async function main() {
   try {
     await fs.access(sourceDir);
   } catch {
-    throw new Error('Missing github/gitignore submodule. Run: git submodule update --init --recursive');
+    throw new Error(
+      'Missing github/gitignore submodule. Run: git submodule update --init --recursive',
+    );
   }
 
   const files = (await walk(sourceDir))
@@ -137,34 +134,6 @@ async function main() {
   for (const target of mapTargets) {
     await fs.mkdir(path.dirname(target), { recursive: true });
     await fs.writeFile(target, `${mapJson}\n`, 'utf8');
-  }
-
-  // Generate static API files for GitHub Pages hosting.
-  // /api/list          → comma-separated list of canonical names
-  // /api/{canonical}   → template body (e.g. /api/Global/macOS)
-  // /api/{shortName}   → alias when shortName differs from canonicalName
-  await fs.mkdir(apiDir, { recursive: true });
-  await fs.writeFile(path.join(apiDir, 'list'), `${list.join(',')}\n`, 'utf8');
-
-  const writtenAliases = new Set();
-
-  for (const canonicalName of list) {
-    const record = templates[canonicalName];
-    const content = `${record.body}\n`;
-
-    // Write canonical path (may include slash, e.g. Global/macOS)
-    const canonicalFile = path.join(apiDir, ...canonicalName.split('/'));
-    await fs.mkdir(path.dirname(canonicalFile), { recursive: true });
-    await fs.writeFile(canonicalFile, content, 'utf8');
-    writtenAliases.add(canonicalName);
-
-    // Write short-name alias when it differs
-    if (record.shortName !== canonicalName && !writtenAliases.has(record.shortName)) {
-      const aliasFile = path.join(apiDir, record.shortName);
-      await fs.mkdir(path.dirname(aliasFile), { recursive: true });
-      await fs.writeFile(aliasFile, content, 'utf8');
-      writtenAliases.add(record.shortName);
-    }
   }
 
   process.stdout.write(`Generated ${index.length} templates.\n`);
