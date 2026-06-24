@@ -39,6 +39,22 @@ function columnize(items: string[], width = 80): string {
   return lines.join('\n');
 }
 
+const LONG_NAME_THRESHOLD = 25;
+
+function formatGroup(items: string[], threshold: number): string {
+  const short = items.filter((s) => s.length <= threshold);
+  const long = items.filter((s) => s.length > threshold);
+  const parts: string[] = [];
+  if (short.length > 0) {
+    parts.push(columnize(short));
+  }
+  if (long.length > 0) {
+    if (parts.length > 0) parts.push('');
+    parts.push(long.join('\n'));
+  }
+  return parts.join('\n');
+}
+
 function normalizeKey(value: string): string {
   return value
     .trim()
@@ -86,7 +102,7 @@ export const onRequest: PagesFunction = async (context) => {
       const sections: string[] = [];
       for (const [label, items] of Object.entries({ Core: core, Global: global, Community: community })) {
         if (items.length === 0) continue;
-        sections.push(`${label} (${items.length}):\n${columnize(items)}`);
+        sections.push(`${label} (${items.length}):\n${formatGroup(items, LONG_NAME_THRESHOLD)}`);
       }
       return new Response(`${sections.join('\n\n')}\n\n${map.list.length} templates.\n`, { headers: makeHeaders() });
     }
