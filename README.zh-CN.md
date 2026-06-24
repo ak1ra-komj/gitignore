@@ -1,5 +1,7 @@
 # gitignore
 
+[English](README.md) | **简体中文**
+
 [gitignore.io] 的自托管替代, 跑在 Cloudflare Pages 上.
 
 前端 Vite + React + TypeScript, `/api` 由 Pages Functions 动态处理, 支持多模板拼接.
@@ -66,7 +68,3 @@ git push
 ## 备注
 
 - `community/` 下的模板默认不收录, 减少命名冲突, 行为更接近 gitignore.io.
-
----
-
-[English](README.md)

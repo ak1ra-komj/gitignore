@@ -1,5 +1,7 @@
 # gitignore
 
+**English** | [简体中文](README.zh-CN.md)
+
 A self-hostable [gitignore.io] alternative. Deployed on Cloudflare Pages.
 
 Built with Vite + React + TypeScript. `/api` endpoints are handled by Cloudflare Pages
@@ -68,7 +70,3 @@ git push
 
 - Templates under `community/` are excluded to reduce naming ambiguity and stay
   closer to gitignore.io's behaviour.
-
----
-
-[中文文档](README.zh-CN.md)
