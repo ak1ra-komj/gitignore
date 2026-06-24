@@ -19,6 +19,26 @@ async function getData(request: Request): Promise<TemplatesMap> {
   return data;
 }
 
+function columnize(items: string[], width = 80): string {
+  if (items.length === 0) return '';
+  const maxLen = Math.max(...items.map((s) => s.length));
+  const colWidth = maxLen + 2;
+  const cols = Math.max(1, Math.floor(width / colWidth));
+  const rows = Math.ceil(items.length / cols);
+  const lines: string[] = [];
+  for (let r = 0; r < rows; r++) {
+    const line: string[] = [];
+    for (let c = 0; c < cols; c++) {
+      const idx = c * rows + r;
+      if (idx < items.length) {
+        line.push(items[idx]!.padEnd(colWidth));
+      }
+    }
+    lines.push(line.join('').trimEnd());
+  }
+  return lines.join('\n');
+}
+
 function normalizeKey(value: string): string {
   return value
     .trim()
@@ -51,7 +71,7 @@ export const onRequest: PagesFunction = async (context) => {
     }
 
     if (catchall === 'list') {
-      return new Response(`${map.list.join(',')}\n`, { headers: makeHeaders() });
+      return new Response(`${columnize(map.list)}\n\n${map.list.length} templates.\n`, { headers: makeHeaders() });
     }
 
     const names = catchall
