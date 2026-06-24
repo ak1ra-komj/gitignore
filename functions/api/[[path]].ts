@@ -71,7 +71,24 @@ export const onRequest: PagesFunction = async (context) => {
     }
 
     if (catchall === 'list') {
-      return new Response(`${columnize(map.list)}\n\n${map.list.length} templates.\n`, { headers: makeHeaders() });
+      const core: string[] = [];
+      const global: string[] = [];
+      const community: string[] = [];
+      for (const name of map.list) {
+        if (name.startsWith('Global/')) {
+          global.push(name);
+        } else if (name.startsWith('community/')) {
+          community.push(name.slice('community/'.length));
+        } else {
+          core.push(name);
+        }
+      }
+      const sections: string[] = [];
+      for (const [label, items] of Object.entries({ Core: core, Global: global, Community: community })) {
+        if (items.length === 0) continue;
+        sections.push(`${label} (${items.length}):\n${columnize(items)}`);
+      }
+      return new Response(`${sections.join('\n\n')}\n\n${map.list.length} templates.\n`, { headers: makeHeaders() });
     }
 
     const names = catchall
