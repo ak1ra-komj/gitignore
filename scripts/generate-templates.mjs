@@ -69,7 +69,6 @@ async function main() {
 
   const files = (await walk(sourceDir))
     .filter((file) => file.endsWith('.gitignore'))
-    .filter((file) => !file.includes(`${path.sep}community${path.sep}`))
     .sort((left, right) => left.localeCompare(right));
 
   const aliases = {};

@@ -44,7 +44,7 @@ bun run format               # Prettier write; bun run format:check for CI
 | `public/data/`                   | Build-generated JSON (gitignored)                                              |
 | `public/favicon.svg`             | Favicon                                                                        |
 
-Templates under `github/gitignore/community/` are excluded from generation.
+All templates under `github/gitignore/` are included, including `community/`.
 
 ## Pages Function
 
