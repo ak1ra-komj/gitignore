@@ -19,7 +19,7 @@ async function getData(request: Request): Promise<TemplatesMap> {
   return data;
 }
 
-function columnize(items: string[], width = 80): string {
+function columnize(items: string[], width = 120): string {
   if (items.length === 0) return '';
   const maxLen = Math.max(...items.map((s) => s.length));
   const colWidth = maxLen + 2;
@@ -39,7 +39,7 @@ function columnize(items: string[], width = 80): string {
   return lines.join('\n');
 }
 
-const LONG_NAME_THRESHOLD = 25;
+const LONG_NAME_THRESHOLD = 35;
 
 function formatGroup(items: string[], threshold: number): string {
   const short = items.filter((s) => s.length <= threshold);
@@ -94,7 +94,7 @@ export const onRequest: PagesFunction = async (context) => {
         if (name.startsWith('Global/')) {
           global.push(name);
         } else if (name.startsWith('community/')) {
-          community.push(name.slice('community/'.length));
+          community.push(name);
         } else {
           core.push(name);
         }
@@ -115,7 +115,12 @@ export const onRequest: PagesFunction = async (context) => {
     const missing: string[] = [];
 
     for (const name of names) {
-      const canonical = map.templates[name] ? name : (map.aliases[normalizeKey(name)] ?? null);
+      let canonical = map.templates[name] ? name : (map.aliases[normalizeKey(name)] ?? null);
+      if (!canonical) {
+        const communityName = `community/${name}`;
+        canonical =
+          map.templates[communityName] ?? map.aliases[normalizeKey(communityName)] ?? null;
+      }
       if (!canonical || !map.templates[canonical]) {
         missing.push(name);
       } else {
