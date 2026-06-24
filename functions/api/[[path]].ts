@@ -113,6 +113,7 @@ export const onRequest: PagesFunction = async (context) => {
       .filter(Boolean);
     const bodies: string[] = [];
     const missing: string[] = [];
+    const seen = new Set<string>();
 
     for (const name of names) {
       let canonical = map.templates[name] ? name : (map.aliases[normalizeKey(name)] ?? null);
@@ -122,8 +123,9 @@ export const onRequest: PagesFunction = async (context) => {
           map.templates[communityName] ?? map.aliases[normalizeKey(communityName)] ?? null;
       }
       if (!canonical || !map.templates[canonical]) {
-        missing.push(name);
-      } else {
+        if (!missing.includes(name)) missing.push(name);
+      } else if (!seen.has(canonical)) {
+        seen.add(canonical);
         bodies.push(map.templates[canonical].body);
       }
     }
