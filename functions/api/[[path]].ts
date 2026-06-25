@@ -100,11 +100,17 @@ export const onRequest: PagesFunction = async (context) => {
         }
       }
       const sections: string[] = [];
-      for (const [label, items] of Object.entries({ Core: core, Global: global, Community: community })) {
+      for (const [label, items] of Object.entries({
+        Core: core,
+        Global: global,
+        Community: community,
+      })) {
         if (items.length === 0) continue;
         sections.push(`${label} (${items.length}):\n${formatGroup(items, LONG_NAME_THRESHOLD)}`);
       }
-      return new Response(`${sections.join('\n\n')}\n\n${map.list.length} templates.\n`, { headers: makeHeaders() });
+      return new Response(`${sections.join('\n\n')}\n\n${map.list.length} templates.\n`, {
+        headers: makeHeaders(),
+      });
     }
 
     const names = catchall
