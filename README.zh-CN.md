@@ -52,19 +52,25 @@ git ignore Go,Node,macOS > .gitignore
 1. 在 Cloudflare Dashboard 创建 Pages 项目, 名称填 `gitignore`.
 2. 创建 API Token: **My Profile → API Tokens** → 使用 _Cloudflare Pages Edit_ 模板.
 3. 从 Workers & Pages 侧边栏获取 Account ID.
-4. 在 GitHub 仓库 Secrets 中添加:
+4. 在 GitHub 仓库 Secrets 中添加 (在 Environment `cloudflare-pages` 下):
    - `CLOUDFLARE_API_TOKEN`
    - `CLOUDFLARE_ACCOUNT_ID`
+   - `GITIGNORE_BOT_PAT` -- Fine-grained PAT, 权限 `contents: write` (供定时子模块更新器使用)
+
+可选:
+
+5. 在仓库 Settings → Code security 中开启 **Dependabot security updates**.
+6. 在仓库 Settings → General → Pull Requests 中开启 **Allow auto-merge**.
+7. `dependabot-auto-merge.yml` 会在 CI 通过后自动 approve 并 squash 合并 Dependabot PR.
 
 ## 更新模板
 
-```bash
-git submodule update --remote --merge github/gitignore
-git add github/gitignore
-git commit -m "chore: update github/gitignore submodule"
-git push
-```
+模板更新已全自动化. 定时 GitHub Actions 工作流 (`update-submodule.yml`) 每周运行,
+检查 [github/gitignore] 是否有新提交, 有则推送更新后的子模块引用. 推送动作触发
+`deploy.yml` 重新构建并部署站点.
+
+如需手动触发更新, 在 Actions 标签页运行 **Update Submodule** 工作流即可.
 
 ## 备注
 
-- `community/` 下的模板默认不收录, 减少命名冲突, 行为更接近 gitignore.io.
+- 全部 312 个模板均已收录: Core, Global 和 Community.

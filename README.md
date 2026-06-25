@@ -5,7 +5,7 @@
 A self-hostable [gitignore.io] alternative. Deployed on Cloudflare Pages.
 
 Built with Vite + React + TypeScript. `/api` endpoints are handled by Cloudflare Pages
-Functions — supporting multi-template concatenation. Template data is generated at build
+Functions -- supporting multi-template concatenation. Template data is generated at build
 time from the [github/gitignore] submodule.
 
 [gitignore.io]: https://gitignore.io
@@ -53,20 +53,27 @@ Prerequisites:
 1. Create a Pages project named `gitignore` in the Cloudflare Dashboard.
 2. Create an API token: **My Profile → API Tokens** → use the _Cloudflare Pages Edit_ template.
 3. Get your Account ID from the Workers & Pages sidebar.
-4. Add these secrets to your GitHub repo:
+4. Add these secrets to your GitHub repo (under Environment `cloudflare-pages`):
    - `CLOUDFLARE_API_TOKEN`
    - `CLOUDFLARE_ACCOUNT_ID`
+   - `GITIGNORE_BOT_PAT` -- a fine-grained PAT with `contents: write` (used by the scheduled submodule updater)
+
+Optional:
+
+5. Enable **Dependabot security updates** in repo Settings → Code security.
+6. Enable **Allow auto-merge** in repo Settings → General → Pull Requests.
+7. `dependabot-auto-merge.yml` will approve and auto-merge Dependabot PRs once CI passes.
 
 ## Updating templates
 
-```bash
-git submodule update --remote --merge github/gitignore
-git add github/gitignore
-git commit -m "chore: update github/gitignore submodule"
-git push
-```
+Template updates are fully automated. A scheduled GitHub Actions workflow
+(`update-submodule.yml`) runs weekly, checks [github/gitignore] for new commits,
+and pushes the updated submodule reference if changes are found. The push triggers
+`deploy.yml`, which rebuilds and redeploys the site.
+
+To trigger an update manually, run the **Update Submodule** workflow from the
+Actions tab.
 
 ## Notes
 
-- Templates under `community/` are excluded to reduce naming ambiguity and stay
-  closer to gitignore.io's behaviour.
+- All 312 templates are included: Core, Global, and Community.
