@@ -1,3 +1,4 @@
 [submodule "github/gitignore"]
 	path = github/gitignore
 	url = https://github.com/github/gitignore.git
+	branch = main
