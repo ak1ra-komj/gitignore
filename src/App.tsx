@@ -246,7 +246,7 @@ export default function App() {
         <div className="site-header__links">
           <a
             className="gh-link"
-            href="https://github.com/ak1ra-komj/gitignore"
+            href="https://github.com/ak1ra-lab/gitignore"
             target="_blank"
             rel="noopener noreferrer"
             title="GitHub"
